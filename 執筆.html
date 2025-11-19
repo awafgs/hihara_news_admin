@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日原日報オンライン - 記事投稿</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #f8f9fa;
+        }
+        h1, h2, h3 {
+            font-family: 'Inter', 'Noto Serif JP', serif;
+        }
+        .modal-enter {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-900">
+
+    <div id="message-box" class="fixed top-0 left-1/2 transform -translate-x-1/2 mt-4 p-4 rounded-lg shadow-xl text-white font-bold transition duration-300 opacity-0 hidden z-50">
+        <span id="message-content"></span>
+    </div>
+
+    <header class="bg-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="text-center md:text-left">
+                <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">日原日報 - 投稿管理</h1>
+                <p id="date-display" class="text-sm text-gray-500 mt-1"></p>
+            </div>
+            
+            <div class="flex flex-col md:flex-row gap-4 mt-4 md:mt-0">
+                <button id="post-button" onclick="showPasswordModal('post')" disabled class="bg-red-600 text-white font-semibold py-2 px-4 rounded-full shadow-lg transition duration-300 opacity-50 cursor-not-allowed">
+                    + 記事を投稿する
+                </button>
+                <a href="index.html" class="bg-gray-800 text-white font-semibold py-2 px-4 rounded-full shadow-lg hover:bg-gray-700 transition duration-300 text-center">
+                    閲覧サイトへ
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <main class="space-y-12">
+            <div id="loading-initial" class="text-center py-20">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-red-500 mx-auto mb-4"></div>
+                <p class="text-gray-500">システムに接続中...</p>
+            </div>
+
+            <section class="p-8 bg-white rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">投稿ガイド</h2>
+                <p class="text-gray-700 mb-4">管理者パスワードが必要です。</p>
+                <ul class="list-disc list-inside space-y-2 text-gray-600 text-sm">
+                    <li>ここから投稿された記事は、即座に閲覧サイトに反映されます。</li>
+                    <li>本文中の改行はそのまま表示されます。</li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <div id="password-modal" class="hidden fixed inset-0 z-50 bg-gray-900 bg-opacity-75 flex justify-center items-center modal-enter">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm p-6 relative">
+            <h3 class="text-xl font-bold mb-4 text-red-600">管理者認証</h3>
+            <input type="password" id="password-input" placeholder="パスワード" class="w-full p-3 border border-gray-300 rounded-lg mb-4" onkeydown="if(event.key === 'Enter') checkPassword()">
+            <button onclick="checkPassword()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg">認証</button>
+            <button onclick="hidePasswordModal()" class="w-full mt-2 text-gray-500 py-2 text-sm">キャンセル</button>
+        </div>
+    </div>
+    
+    <div id="post-modal" class="hidden fixed inset-0 z-50 bg-gray-900 bg-opacity-75 flex justify-center items-center modal-enter">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl p-8 relative max-h-[90vh] overflow-y-auto">
+            <h3 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">新規記事作成</h3>
+            <button onclick="hidePostModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
+            
+            <form id="post-form" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">タイトル</label>
+                    <input type="text" id="post-title" class="w-full border-gray-300 rounded-md shadow-sm p-3 border" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">サマリー (一覧用)</label>
+                    <textarea id="post-summary" rows="2" class="w-full border-gray-300 rounded-md shadow-sm p-3 border"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">カテゴリ</label>
+                    <select id="post-category" class="w-full border-gray-300 rounded-md shadow-sm p-3 border bg-white"></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">本文</label>
+                    <textarea id="post-content" rows="12" class="w-full border-gray-300 rounded-md shadow-sm p-3 border" required></textarea>
+                </div>
+                <button type="button" onclick="handlePost()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow-lg">投稿する</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        // 設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfMuJXDjc87Q9CwabZNn4sw2fTd3ofHag", 
+            authDomain: "hiharanippo.firebaseapp.com",
+            projectId: "hiharanippo", 
+            storageBucket: "hiharanippo.firebasestorage.app",
+            messagingSenderId: "853955512604",
+            appId: "1:853955512604:web:dd3e51b06bdd1e2b7292d9",
+            measurementId: "G-B4S4YXZT0D"
+        };
+
+        const appId = firebaseConfig.appId;
+        const ADMIN_PASSWORD = 'twitter'; 
+        const ALLOWED_CATEGORIES = ["社会", "経済・ビジネス", "スポーツ", "政治", "社説・主張"];
+        
+        let app, db, auth, userId;
+
+        async function initFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                await signInAnonymously(auth);
+                
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        const btn = document.getElementById('post-button');
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        btn.disabled = false;
+                        document.getElementById('loading-initial').classList.add('hidden');
+                        showMessage('success', '接続完了: 投稿可能です');
+                    }
+                });
+            } catch (error) {
+                console.error("Init Error:", error);
+                showMessage('error', '接続エラー: ' + error.message);
+            }
+        }
+
+        // モーダル制御
+        window.showPasswordModal = () => {
+            document.getElementById('password-input').value = '';
+            const modal = document.getElementById('password-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('modal-enter-active'), 10);
+        };
+
+        window.hidePasswordModal = () => {
+            const modal = document.getElementById('password-modal');
+            modal.classList.remove('modal-enter-active');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+
+        window.checkPassword = () => {
+            if (document.getElementById('password-input').value === ADMIN_PASSWORD) {
+                window.hidePasswordModal();
+                window.showPostModal();
+            } else {
+                showMessage('error', 'パスワードが違います');
+            }
+        };
+
+        window.showPostModal = () => {
+            const select = document.getElementById('post-category');
+            select.innerHTML = ALLOWED_CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('');
+            const modal = document.getElementById('post-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('modal-enter-active'), 10);
+        };
+
+        window.hidePostModal = () => {
+            const modal = document.getElementById('post-modal');
+            modal.classList.remove('modal-enter-active');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+
+        window.handlePost = async () => {
+            const title = document.getElementById('post-title').value.trim();
+            const summary = document.getElementById('post-summary').value.trim();
+            const content = document.getElementById('post-content').value.trim();
+            const category = document.getElementById('post-category').value;
+            
+            if (!title || !content) {
+                showMessage('error', 'タイトルと本文は必須です');
+                return;
+            }
+
+            try {
+                // 本文を行ごとの配列にする
+                const contentArray = content.split('\n');
+                const articlesRef = collection(db, `artifacts/${appId}/public/data/articles`);
+                
+                await addDoc(articlesRef, {
+                    title, summary, category,
+                    content: contentArray,
+                    timestamp: serverTimestamp(),
+                    userId: userId,
+                    hidden: false // 初期状態は表示
+                });
+                
+                showMessage('success', '投稿しました！');
+                window.hidePostModal();
+                document.getElementById('post-form').reset();
+            } catch (error) {
+                console.error("Post Error:", error);
+                showMessage('error', '投稿失敗: ' + error.message);
+            }
+        };
+
+        window.showMessage = (type, msg) => {
+            const box = document.getElementById('message-box');
+            const content = document.getElementById('message-content');
+            box.className = `fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-xl text-white font-bold transition duration-300 z-50 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+            content.textContent = msg;
+            box.classList.remove('hidden', 'opacity-0');
+            setTimeout(() => box.classList.add('opacity-0'), 3000);
+            setTimeout(() => box.classList.add('hidden'), 3300);
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const d = new Date();
+            document.getElementById('date-display').textContent = d.toLocaleDateString('ja-JP', {year:'numeric', month:'long', day:'numeric'});
+            initFirebase();
+        });
+    </script>
+</body>
+</html>
