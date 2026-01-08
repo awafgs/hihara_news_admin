@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,30 +8,39 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700&display=swap"
+        rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
             background-color: #f8f9fa;
         }
-        h1, h2, h3 {
+
+        h1,
+        h2,
+        h3 {
             font-family: 'Inter', 'Noto Serif JP', serif;
         }
+
         /* モーダル表示時のアニメーション */
         .modal-enter {
             opacity: 0;
             transform: scale(0.95);
             transition: opacity 0.2s, transform 0.2s;
         }
+
         .modal-enter-active {
             opacity: 1;
             transform: scale(1);
         }
     </style>
 </head>
+
 <body class="min-h-screen text-gray-900">
 
-    <div id="message-box" class="fixed top-0 left-1/2 transform -translate-x-1/2 mt-4 p-4 rounded-lg shadow-xl text-white font-bold transition duration-300 opacity-0 hidden z-50">
+    <div id="message-box"
+        class="fixed top-0 left-1/2 transform -translate-x-1/2 mt-4 p-4 rounded-lg shadow-xl text-white font-bold transition duration-300 opacity-0 hidden z-50">
         <span id="message-content"></span>
     </div>
 
@@ -47,21 +57,64 @@
             <p class="text-gray-600">記事データを取得中...</p>
         </div>
 
+        <!-- 検索フォーム -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-lg font-bold mb-4 text-gray-800">記事検索</h2>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">キーワード</label>
+                    <input type="text" id="search-keyword" placeholder="タイトル・本文..."
+                        class="w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">開始日</label>
+                    <input type="date" id="search-date-from"
+                        class="w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">終了日</label>
+                    <input type="date" id="search-date-to"
+                        class="w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">ジャンル</label>
+                    <select id="search-genre"
+                        class="w-full border-gray-300 rounded-md shadow-sm p-2 border bg-white focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">すべて</option>
+                    </select>
+                </div>
+                <div class="flex items-end gap-2">
+                    <button onclick="searchArticles()"
+                        class="flex-1 bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded shadow transition">
+                        検索
+                    </button>
+                    <button onclick="resetSearch()"
+                        class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 text-gray-600">
+                        リセット
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div id="categorized-container" class="space-y-12"></div>
     </div>
 
-    <div id="article-modal" class="hidden fixed inset-0 z-40 bg-black bg-opacity-70 flex justify-center items-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col modal-enter-active">
+    <div id="article-modal"
+        class="hidden fixed inset-0 z-40 bg-black bg-opacity-70 flex justify-center items-center p-4">
+        <div
+            class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col modal-enter-active">
             <div class="p-4 border-b flex justify-between items-center">
                 <h3 class="font-bold text-lg">記事詳細</h3>
                 <button onclick="hideArticleModal()" class="text-2xl text-gray-500 hover:text-gray-800">&times;</button>
             </div>
             <div id="modal-content" class="p-8 overflow-y-auto flex-grow"></div>
             <div class="p-4 border-t bg-gray-50 flex justify-end gap-4">
-                <button id="edit-trigger-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition">
+                <button id="edit-trigger-btn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition">
                     編集する
                 </button>
-                <button id="delete-trigger-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded shadow transition">
+                <button id="delete-trigger-btn"
+                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded shadow transition">
                     削除する
                 </button>
             </div>
@@ -69,48 +122,63 @@
     </div>
 
     <div id="edit-modal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto modal-enter-active relative">
+        <div
+            class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto modal-enter-active relative">
             <div class="p-6">
                 <h3 class="text-2xl font-bold mb-6 text-blue-700 border-b pb-2">記事の編集</h3>
-                <button onclick="hideEditModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
-                
+                <button onclick="hideEditModal()"
+                    class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
+
                 <form id="edit-form" class="space-y-5">
                     <input type="hidden" id="edit-id">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">タイトル</label>
-                        <input type="text" id="edit-title" class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-blue-500 focus:border-blue-500" required>
+                        <input type="text" id="edit-title"
+                            class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-blue-500 focus:border-blue-500"
+                            required>
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">サマリー (一覧用)</label>
-                        <textarea id="edit-summary" rows="2" class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        <textarea id="edit-summary" rows="2"
+                            class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-blue-500 focus:border-blue-500"></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">カテゴリ</label>
-                        <select id="edit-category" class="w-full border-gray-300 rounded-md shadow-sm p-3 border bg-white focus:ring-blue-500 focus:border-blue-500"></select>
+                        <select id="edit-category"
+                            class="w-full border-gray-300 rounded-md shadow-sm p-3 border bg-white focus:ring-blue-500 focus:border-blue-500"></select>
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">本文 (改行はそのまま反映されます)</label>
-                        <textarea id="edit-content" rows="12" class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-blue-500 focus:border-blue-500" required></textarea>
+                        <textarea id="edit-content" rows="12"
+                            class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-blue-500 focus:border-blue-500"
+                            required></textarea>
                     </div>
                     <div class="flex gap-4 pt-4">
-                        <button type="button" onclick="hideEditModal()" class="flex-1 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">キャンセル</button>
-                        <button type="button" onclick="saveEdit()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg">変更を保存</button>
+                        <button type="button" onclick="hideEditModal()"
+                            class="flex-1 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">キャンセル</button>
+                        <button type="button" onclick="saveEdit()"
+                            class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg">変更を保存</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <div id="password-modal" class="hidden fixed inset-0 z-[60] bg-black bg-opacity-80 flex justify-center items-center p-4">
+    <div id="password-modal"
+        class="hidden fixed inset-0 z-[60] bg-black bg-opacity-80 flex justify-center items-center p-4">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 modal-enter-active">
             <h3 id="password-modal-title" class="text-xl font-bold text-gray-800 mb-2">管理者認証</h3>
             <p id="password-modal-desc" class="text-sm text-gray-600 mb-4">操作を続けるにはパスワードを入力してください。</p>
-            
-            <input type="password" id="password-input" placeholder="パスワード" class="w-full p-3 border rounded mb-4 focus:ring-2 focus:ring-gray-500" onkeydown="if(event.key === 'Enter') confirmPasswordAction()">
-            
+
+            <input type="password" id="password-input" placeholder="パスワード"
+                class="w-full p-3 border rounded mb-4 focus:ring-2 focus:ring-gray-500"
+                onkeydown="if(event.key === 'Enter') confirmPasswordAction()">
+
             <div class="flex gap-3">
-                <button onclick="hidePasswordModal()" class="flex-1 py-2 border rounded text-gray-600 hover:bg-gray-100">中止</button>
-                <button onclick="confirmPasswordAction()" class="flex-1 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 font-bold">認証</button>
+                <button onclick="hidePasswordModal()"
+                    class="flex-1 py-2 border rounded text-gray-600 hover:bg-gray-100">中止</button>
+                <button onclick="confirmPasswordAction()"
+                    class="flex-1 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 font-bold">認証</button>
             </div>
         </div>
     </div>
@@ -121,9 +189,9 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyAfMuJXDjc87Q9CwabZNn4sw2fTd3ofHag", 
+            apiKey: "AIzaSyAfMuJXDjc87Q9CwabZNn4sw2fTd3ofHag",
             authDomain: "hiharanippo.firebaseapp.com",
-            projectId: "hiharanippo", 
+            projectId: "hiharanippo",
             storageBucket: "hiharanippo.firebasestorage.app",
             messagingSenderId: "853955512604",
             appId: "1:853955512604:web:dd3e51b06bdd1e2b7292d9",
@@ -131,12 +199,12 @@
         };
 
         const appId = firebaseConfig.appId;
-        const ADMIN_PASSWORD = 'twitter'; 
-        const ALLOWED_CATEGORIES = ["日原日報からのお知らせ","社会", "経済・ビジネス", "スポーツ", "政治","IT", "社説・主張"];
-        
+        const ADMIN_PASSWORD = 'twitter';
+        const ALLOWED_CATEGORIES = ["日原日報からのお知らせ", "社会", "経済・ビジネス", "スポーツ", "政治", "IT", "社説・主張"];
+
         let db, auth;
         let allArticles = [];
-        
+
         // 処理待ちのアクション情報
         let pendingAction = null; // 'edit' or 'delete'
         let pendingTargetId = null;
@@ -146,25 +214,27 @@
             db = getFirestore(app);
             auth = getAuth(app);
             await signInAnonymously(auth);
-            
+
             const q = query(collection(db, `artifacts/${appId}/public/data/articles`), orderBy("timestamp", "desc"));
-            
+
             onSnapshot(q, (snapshot) => {
                 allArticles = snapshot.docs.map(d => {
                     const data = d.data();
                     let content = data.content;
                     try {
                         if (typeof content === 'string' && content.startsWith('[')) content = JSON.parse(content);
-                    } catch(e){}
+                    } catch (e) { }
 
                     return {
-                        id: d.id, 
-                        ...data, 
+                        id: d.id,
+                        ...data,
                         content: content,
                         timestamp: data.timestamp?.toDate() || new Date()
                     };
                 });
                 renderList();
+                renderList();
+                setupSearchForm();
                 document.getElementById('loading-initial').classList.add('hidden');
             });
         }
@@ -175,14 +245,14 @@
 
             ALLOWED_CATEGORIES.forEach(cat => {
                 const articles = allArticles.filter(a => a.category === cat);
-                if(articles.length === 0) return;
+                if (articles.length === 0) return;
 
                 const section = document.createElement('section');
                 section.className = 'border-t-4 border-gray-300 pt-4';
-                
+
                 let html = `<h2 class="text-2xl font-bold mb-4 text-gray-800">${cat} <span class="text-sm font-normal text-gray-500">(${articles.length})</span></h2>`;
                 html += `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">`;
-                
+
                 articles.forEach(article => {
                     html += `
                         <div onclick="openArticleModal('${article.id}')" class="bg-white p-5 rounded shadow hover:shadow-lg cursor-pointer transition border hover:border-blue-300 relative group">
@@ -193,7 +263,7 @@
                         </div>
                     `;
                 });
-                
+
                 html += `</div>`;
                 section.innerHTML = html;
                 container.appendChild(section);
@@ -203,16 +273,16 @@
         // 詳細モーダル
         window.openArticleModal = (id) => {
             const article = allArticles.find(a => a.id === id);
-            if(!article) return;
+            if (!article) return;
 
             const contentStr = Array.isArray(article.content) ? article.content.join('\n\n') : article.content;
-            
+
             document.getElementById('modal-content').innerHTML = `
                 <h2 class="text-3xl font-bold mb-2">${article.title}</h2>
                 <div class="text-sm text-gray-500 mb-6">ID: ${article.id} / カテゴリ: ${article.category}</div>
                 <div class="prose max-w-none whitespace-pre-wrap bg-gray-50 p-4 rounded border">${contentStr}</div>
             `;
-            
+
             // 編集・削除ボタンの設定
             document.getElementById('edit-trigger-btn').onclick = () => triggerPasswordAuth('edit', id);
             document.getElementById('delete-trigger-btn').onclick = () => triggerPasswordAuth('delete', id);
@@ -268,7 +338,7 @@
             // パスワードOKの場合
             const action = pendingAction;
             const id = pendingTargetId;
-            
+
             // モーダルを閉じる
             document.getElementById('password-modal').classList.add('hidden');
 
@@ -285,7 +355,7 @@
                 await deleteDoc(doc(db, `artifacts/${appId}/public/data/articles`, id));
                 window.hideArticleModal();
                 showMessage('success', '記事を完全に削除しました');
-            } catch(e) {
+            } catch (e) {
                 console.error(e);
                 alert('削除エラー: ' + e.message);
             }
@@ -294,7 +364,7 @@
         // 編集フォーム関連
         function openEditForm(id) {
             const article = allArticles.find(a => a.id === id);
-            if(!article) return;
+            if (!article) return;
 
             // カテゴリ選択肢生成
             const select = document.getElementById('edit-category');
@@ -305,7 +375,7 @@
             document.getElementById('edit-title').value = article.title;
             document.getElementById('edit-summary').value = article.summary || '';
             document.getElementById('edit-category').value = article.category;
-            
+
             // Contentは配列なら結合して表示
             let contentStr = '';
             if (Array.isArray(article.content)) {
@@ -362,16 +432,127 @@
         function showMessage(type, msg) {
             const box = document.getElementById('message-box');
             const content = box.querySelector('span');
-            
+
             box.className = `fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded shadow-xl text-white font-bold transition duration-300 z-[70] ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
             content.textContent = msg;
-            
+
             box.classList.remove('hidden', 'opacity-0');
             setTimeout(() => box.classList.add('opacity-0'), 3000);
             setTimeout(() => box.classList.add('hidden'), 3300);
         }
 
+
+        // 検索関連機能
+        function setupSearchForm() {
+            const select = document.getElementById('search-genre');
+            // すでにoptionが追加されていないか確認 (すべて + カテゴリ数)
+            if (select && select.options.length <= 1) {
+                ALLOWED_CATEGORIES.forEach(c => {
+                    const option = document.createElement('option');
+                    option.value = c;
+                    option.textContent = c;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        window.searchArticles = () => {
+            const keyword = document.getElementById('search-keyword').value.toLowerCase().trim();
+            const dateFromStr = document.getElementById('search-date-from').value;
+            const dateToStr = document.getElementById('search-date-to').value;
+            const genre = document.getElementById('search-genre').value;
+
+            if (!keyword && !dateFromStr && !dateToStr && !genre) {
+                renderList();
+                return;
+            }
+
+            const results = allArticles.filter(a => {
+                let match = true;
+
+                // Keyword match
+                if (keyword) {
+                    const title = (a.title || '').toLowerCase();
+                    const summary = (a.summary || '').toLowerCase();
+                    const content = Array.isArray(a.content) ? a.content.join(' ').toLowerCase() : (a.content || '').toLowerCase();
+
+                    if (!title.includes(keyword) && !summary.includes(keyword) && !content.includes(keyword)) {
+                        match = false;
+                    }
+                }
+
+                // Date range match
+                if (match && (dateFromStr || dateToStr)) {
+                    const articleDate = a.timestamp.getFullYear() + '-' +
+                        String(a.timestamp.getMonth() + 1).padStart(2, '0') + '-' +
+                        String(a.timestamp.getDate()).padStart(2, '0');
+
+                    // 開始日チェック
+                    if (dateFromStr && articleDate < dateFromStr) {
+                        match = false;
+                    }
+
+                    // 終了日チェック
+                    if (dateToStr && articleDate > dateToStr) {
+                        match = false;
+                    }
+                }
+
+                // Genre match
+                if (match && genre) {
+                    if (a.category !== genre) {
+                        match = false;
+                    }
+                }
+
+                return match;
+            });
+
+            renderSearchResults(results);
+        };
+
+        window.resetSearch = () => {
+            document.getElementById('search-keyword').value = '';
+            document.getElementById('search-date-from').value = '';
+            document.getElementById('search-date-to').value = '';
+            document.getElementById('search-genre').value = '';
+            renderList();
+        };
+
+        function renderSearchResults(articles) {
+            const container = document.getElementById('categorized-container');
+            container.innerHTML = '';
+
+            if (articles.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 py-8">該当する記事が見つかりませんでした。</div>';
+                return;
+            }
+
+            const section = document.createElement('section');
+            section.className = 'pt-4';
+
+            let html = `<h2 class="text-2xl font-bold mb-4 text-gray-800">検索結果 <span class="text-sm font-normal text-gray-500">(${articles.length}件)</span></h2>`;
+            html += `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">`;
+
+            articles.forEach(article => {
+                html += `
+                        <div onclick="openArticleModal('${article.id}')" class="bg-white p-5 rounded shadow hover:shadow-lg cursor-pointer transition border hover:border-blue-300 relative group">
+                            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded border">詳細・編集・削除</div>
+                            <span class="inline-block px-2 py-1 mb-2 text-xs font-semibold text-white bg-gray-500 rounded">${article.category}</span>
+                            <h3 class="font-bold text-lg mb-2 line-clamp-2">${article.title}</h3>
+                            <p class="text-sm text-gray-600 mb-2 line-clamp-3">${article.summary || 'サマリーなし'}</p>
+                            <p class="text-xs text-gray-400">${article.timestamp.toLocaleString('ja-JP')}</p>
+                        </div>
+                    `;
+            });
+
+            html += `</div>`;
+            section.innerHTML = html;
+            container.appendChild(section);
+        }
+
         init();
     </script>
 </body>
+
 </html>
